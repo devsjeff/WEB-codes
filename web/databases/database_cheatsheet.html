@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Cheat Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #080a0e;
+    --s1: #0e1117;
+    --s2: #141820;
+    --s3: #1c2130;
+    --border: #1e2535;
+    --pg: #4ade9a;       /* postgres green */
+    --mg: #47b784;       /* mongo green */
+    --fb: #f5a623;       /* firebase orange */
+    --s3c: #ff6b35;      /* s3 orange */
+    --rd: #e05252;       /* redis red */
+    --kf: #7c6af7;       /* kafka purple */
+    --text: #c8d3e0;
+    --text2: #6b7a8f;
+    --text3: #3a4455;
+    --white: #eef2f8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 28px 24px;
+  }
+
+  /* HEADER */
+  header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--pg); }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .db-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 28px;
+    background: var(--s1);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 9px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    border: none;
+    background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .tab:hover { color: var(--text); background: var(--s2); }
+  .tab.active { background: var(--s2); border: 1px solid var(--border); }
+  .tab.pg.active { color: var(--pg); }
+  .tab.mg.active { color: var(--mg); }
+  .tab.fb.active { color: var(--fb); }
+  .tab.s3.active { color: var(--s3c); }
+  .tab.rd.active { color: var(--rd); }
+  .tab.cm.active { color: var(--text); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* MENTAL MODEL BANNER */
+  .mental-model {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mental-model::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+  }
+
+  .mental-model.pg::before { background: var(--pg); }
+  .mental-model.mg::before { background: var(--mg); }
+  .mental-model.fb::before { background: var(--fb); }
+  .mental-model.s3c::before { background: var(--s3c); }
+  .mental-model.rd::before { background: var(--rd); }
+
+  .mm-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+    color: var(--text2);
+  }
+
+  .mm-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .mm-content strong { color: var(--white); }
+
+  /* GRID LAYOUTS */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 10px 16px;
+    background: var(--s2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  pre {
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    overflow-x: auto;
+    color: var(--text);
+  }
+
+  /* SECTION TITLE */
+  .sec {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sec::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* TABLE */
+  .tbl-wrap {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+  th {
+    background: var(--s2);
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--s2); }
+
+  /* SYNTAX COLORS */
+  .kw  { color: #7c6af7; }   /* keyword */
+  .fn  { color: #4ade9a; }   /* function/method */
+  .str { color: #f0a04a; }   /* string */
+  .num { color: #f06b8a; }   /* number */
+  .cm  { color: #3a4a5e; }   /* comment */
+  .tp  { color: #47b784; }   /* type */
+  .op  { color: #c8d3e0; }   /* operator */
+  .var { color: #89d4f5; }   /* variable */
+
+  /* COMPARISON TABLE */
+  .cmp-cell { text-align: center !important; }
+
+  .yes { color: #4ade9a; font-weight: 700; }
+  .no  { color: #e05252; }
+  .ok  { color: #f5a623; }
+
+  /* WHEN TO USE BOX */
+  .when-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .when-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .when-title {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .when-item {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 4px;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .when-item::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text3);
+  }
+
+  /* RULES BOX */
+  .rules {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .rule {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+
+  .rule:last-child { margin-bottom: 0; }
+
+  .rule-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .rule-text { color: var(--text); line-height: 1.5; }
+  .rule-text strong { color: var(--white); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">db<span>.</span>cheatsheet</div>
+    <div class="subtitle">// PostgreSQL · MongoDB · Firebase · S3 · Redis · Kafka</div>
+  </div>
+  <div class="db-pills">
+    <span class="pill" style="background:rgba(74,222,154,0.1);color:var(--pg)">PostgreSQL</span>
+    <span class="pill" style="background:rgba(71,183,132,0.1);color:var(--mg)">MongoDB</span>
+    <span class="pill" style="background:rgba(245,166,35,0.1);color:var(--fb)">Firebase</span>
+    <span class="pill" style="background:rgba(255,107,53,0.1);color:var(--s3c)">AWS S3</span>
+    <span class="pill" style="background:rgba(224,82,82,0.1);color:var(--rd)">Redis</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab pg active" onclick="show('pg',this)">PostgreSQL</button>
+  <button class="tab mg" onclick="show('mg',this)">MongoDB</button>
+  <button class="tab fb" onclick="show('fb',this)">Firebase</button>
+  <button class="tab s3" onclick="show('s3',this)">AWS S3</button>
+  <button class="tab rd" onclick="show('rd',this)">Redis</button>
+  <button class="tab cm" onclick="show('cm',this)">Compare All</button>
+</div>
+
+<!-- ==================== POSTGRESQL ==================== -->
+<div id="pg" class="panel active">
+
+  <div class="mental-model pg">
+    <div class="mm-title">// mental model</div>
+    <div class="mm-content">
+      Think of PostgreSQL like an <strong>Excel sheet on steroids</strong> — rows, columns, strict types. But it <strong>guarantees</strong> your data is always correct (ACID). Best for: <strong>structured data with relationships</strong> — users, orders, products, anything where rows relate to each other.
+    </div>
+  </div>
+
+  <div class="sec">data types — know these</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Use For</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:var(--pg);font-family:monospace">BIGSERIAL</span></td><td>Auto-increment primary key</td><td><code style="font-family:monospace;font-size:11px">id BIGSERIAL PRIMARY KEY</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">TEXT</span></td><td>Any length string — prefer over VARCHAR</td><td><code style="font-family:monospace;font-size:11px">name TEXT NOT NULL</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">NUMERIC(10,2)</span></td><td>Exact money/decimal</td><td><code style="font-family:monospace;font-size:11px">price NUMERIC(10,2)</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">TIMESTAMPTZ</span></td><td>Date+time+timezone — always use this</td><td><code style="font-family:monospace;font-size:11px">created_at TIMESTAMPTZ DEFAULT NOW()</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">BOOLEAN</span></td><td>true/false</td><td><code style="font-family:monospace;font-size:11px">is_active BOOLEAN DEFAULT true</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">JSONB</span></td><td>Flexible JSON — searchable, indexed</td><td><code style="font-family:monospace;font-size:11px">metadata JSONB</code></td></tr>
+        <tr><td><span style="color:var(--pg);font-family:monospace">UUID</span></td><td>Unique ID across systems</td><td><code style="font-family:monospace;font-size:11px">id UUID DEFAULT gen_random_uuid()</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">table creation — template</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>create table</div>
+      <pre><span class="kw">CREATE TABLE</span> <span class="fn">users</span> (
+  id         <span class="tp">BIGSERIAL PRIMARY KEY</span>,
+  email      <span class="tp">TEXT</span> <span class="kw">NOT NULL UNIQUE</span>,
+  username   <span class="tp">TEXT</span> <span class="kw">NOT NULL</span>,
+  role       <span class="tp">TEXT</span> <span class="kw">NOT NULL DEFAULT</span> <span class="str">'user'</span>,
+  is_active  <span class="tp">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>,
+  created_at <span class="tp">TIMESTAMPTZ</span> <span class="kw">DEFAULT NOW</span>()
+);
+
+<span class="kw">CREATE TABLE</span> <span class="fn">posts</span> (
+  id      <span class="tp">BIGSERIAL PRIMARY KEY</span>,
+  title   <span class="tp">TEXT</span> <span class="kw">NOT NULL</span>,
+  content <span class="tp">TEXT</span>,
+  user_id <span class="tp">BIGINT</span> <span class="kw">REFERENCES</span> users(id)
+          <span class="kw">ON DELETE CASCADE</span>,
+  <span class="cm">-- user delete → posts delete</span>
+  created_at <span class="tp">TIMESTAMPTZ</span> <span class="kw">DEFAULT NOW</span>()
+);</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>constraints — rules on data</div>
+      <pre><span class="kw">CREATE TABLE</span> <span class="fn">products</span> (
+  id    <span class="tp">BIGSERIAL PRIMARY KEY</span>,
+  name  <span class="tp">TEXT</span> <span class="kw">NOT NULL</span>,
+  price <span class="tp">NUMERIC</span>(10,2) <span class="kw">CHECK</span> (price > 0),
+  stock <span class="tp">INTEGER</span> <span class="kw">DEFAULT</span> 0 <span class="kw">CHECK</span> (stock >= 0),
+  <span class="kw">UNIQUE</span>(name)  <span class="cm">-- name must be unique</span>
+);
+
+<span class="cm">-- add constraint later</span>
+<span class="kw">ALTER TABLE</span> users
+<span class="kw">ADD CONSTRAINT</span> email_check
+<span class="kw">CHECK</span> (email <span class="kw">LIKE</span> <span class="str">'%@%'</span>);
+
+<span class="cm">-- add column later</span>
+<span class="kw">ALTER TABLE</span> users
+<span class="kw">ADD COLUMN</span> phone <span class="tp">TEXT</span>;</pre>
+    </div>
+  </div>
+
+  <div class="sec">queries — full reference</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>SELECT patterns</div>
+      <pre><span class="cm">-- basic</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;
+<span class="kw">SELECT</span> id, email <span class="kw">FROM</span> users <span class="kw">WHERE</span> is_active = <span class="kw">true</span>;
+
+<span class="cm">-- filter operators</span>
+<span class="kw">WHERE</span> age <span class="kw">BETWEEN</span> <span class="num">18</span> <span class="kw">AND</span> <span class="num">30</span>
+<span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="str">'Dev%'</span>    <span class="cm">-- starts with Dev</span>
+<span class="kw">WHERE</span> name <span class="kw">ILIKE</span> <span class="str">'%dev%'</span>  <span class="cm">-- case insensitive</span>
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)
+<span class="kw">WHERE</span> email <span class="kw">IS NOT NULL</span>
+
+<span class="cm">-- sort + limit</span>
+<span class="kw">ORDER BY</span> created_at <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">10</span> <span class="kw">OFFSET</span> <span class="num">20</span>  <span class="cm">-- pagination: page 3</span>
+
+<span class="cm">-- count, sum, avg</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*), <span class="fn">AVG</span>(price), <span class="fn">SUM</span>(amount)
+<span class="kw">FROM</span> orders;</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>INSERT · UPDATE · DELETE</div>
+      <pre><span class="cm">-- insert single</span>
+<span class="kw">INSERT INTO</span> users (email, username)
+<span class="kw">VALUES</span> (<span class="str">'dev@gmail.com'</span>, <span class="str">'Dev'</span>)
+<span class="kw">RETURNING</span> *;  <span class="cm">-- get inserted row back</span>
+
+<span class="cm">-- insert multiple</span>
+<span class="kw">INSERT INTO</span> users (email, username) <span class="kw">VALUES</span>
+  (<span class="str">'a@x.com'</span>, <span class="str">'A'</span>),
+  (<span class="str">'b@x.com'</span>, <span class="str">'B'</span>);
+
+<span class="cm">-- upsert (insert or update)</span>
+<span class="kw">INSERT INTO</span> users (email, username)
+<span class="kw">VALUES</span> (<span class="str">'dev@x.com'</span>, <span class="str">'Dev'</span>)
+<span class="kw">ON CONFLICT</span> (email)
+<span class="kw">DO UPDATE SET</span> username = <span class="kw">EXCLUDED</span>.username;
+
+<span class="cm">-- update</span>
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> username = <span class="str">'NewDev'</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span> <span class="kw">RETURNING</span> *;
+
+<span class="cm">-- delete</span>
+<span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> id = <span class="num">1</span>;</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>JOINs</div>
+      <pre><span class="cm">-- INNER JOIN — match hona chahiye dono mein</span>
+<span class="kw">SELECT</span> u.username, p.title
+<span class="kw">FROM</span> posts p
+<span class="kw">INNER JOIN</span> users u <span class="kw">ON</span> p.user_id = u.id;
+
+<span class="cm">-- LEFT JOIN — left table sab aayega</span>
+<span class="cm">-- right mein nahi toh NULL</span>
+<span class="kw">SELECT</span> u.username, <span class="fn">COUNT</span>(p.id) <span class="kw">as</span> post_count
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> posts p <span class="kw">ON</span> p.user_id = u.id
+<span class="kw">GROUP BY</span> u.id, u.username;
+
+<span class="cm">-- multiple joins</span>
+<span class="kw">SELECT</span> u.username, p.title, c.body
+<span class="kw">FROM</span> posts p
+<span class="kw">JOIN</span> users u <span class="kw">ON</span> p.user_id = u.id
+<span class="kw">JOIN</span> comments c <span class="kw">ON</span> c.post_id = p.id
+<span class="kw">WHERE</span> u.is_active = <span class="kw">true</span>
+<span class="kw">ORDER BY</span> p.created_at <span class="kw">DESC</span>;</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>GROUP BY · CTE · Window</div>
+      <pre><span class="cm">-- GROUP BY + HAVING</span>
+<span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">as</span> total
+<span class="kw">FROM</span> posts
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) > <span class="num">5</span>;  <span class="cm">-- filter on group</span>
+
+<span class="cm">-- CTE (clean complex queries)</span>
+<span class="kw">WITH</span> active <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> is_active = <span class="kw">true</span>
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> active <span class="kw">WHERE</span> role = <span class="str">'admin'</span>;
+
+<span class="cm">-- Window Function (ranking)</span>
+<span class="kw">SELECT</span> username, amount,
+  <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> user_id
+    <span class="kw">ORDER BY</span> amount <span class="kw">DESC</span>
+  ) <span class="kw">as</span> rank
+<span class="kw">FROM</span> orders;</pre>
+    </div>
+  </div>
+
+  <div class="sec">indexes — when and how</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>index types</div>
+      <pre><span class="cm">-- B-Tree (default) — WHERE, ORDER BY</span>
+<span class="kw">CREATE INDEX</span> idx_users_email
+<span class="kw">ON</span> users(email);
+
+<span class="cm">-- Composite — multiple columns</span>
+<span class="kw">CREATE INDEX</span> idx_posts_user_date
+<span class="kw">ON</span> posts(user_id, created_at <span class="kw">DESC</span>);
+
+<span class="cm">-- Partial — sirf kuch rows</span>
+<span class="kw">CREATE INDEX</span> idx_active_users
+<span class="kw">ON</span> users(email) <span class="kw">WHERE</span> is_active = <span class="kw">true</span>;
+
+<span class="cm">-- GIN — JSONB aur arrays ke liye</span>
+<span class="kw">CREATE INDEX</span> idx_meta
+<span class="kw">ON</span> events <span class="kw">USING GIN</span>(data);
+
+<span class="cm">-- check if index is being used</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'x@x.com'</span>;</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>index rules</div>
+      <pre><span class="cm">-- INDEX BANAO JAB:</span>
+WHERE clause mein column  → index
+JOIN condition mein column → index  
+ORDER BY mein column      → index
+Foreign key column        → index
+
+<span class="cm">-- INDEX MAT BANAO JAB:</span>
+Small table (< 1000 rows) → skip
+Columns jo rarely use ho  → skip
+Bahut zyada writes ho     → careful
+<span class="cm">-- index writes bhi slow karta hai</span>
+
+<span class="cm">-- EXPLAIN output mein dekho:</span>
+<span class="str">"Seq Scan"</span>   → index nahi — slow
+<span class="str">"Index Scan"</span> → index use ho raha — fast</pre>
+    </div>
+  </div>
+
+  <div class="sec">python integration</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>asyncpg + FastAPI (production)</div>
+      <pre><span class="kw">import</span> asyncpg
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+
+<span class="var">pool</span> = <span class="kw">None</span>
+
+<span class="kw">async def</span> <span class="fn">startup</span>():
+    <span class="kw">global</span> pool
+    <span class="var">pool</span> = <span class="kw">await</span> asyncpg.<span class="fn">create_pool</span>(
+        <span class="str">"postgresql://user:pass@localhost/db"</span>,
+        min_size=<span class="num">5</span>, max_size=<span class="num">20</span>
+    )
+
+<span class="cm"># query karo</span>
+<span class="kw">async with</span> pool.<span class="fn">acquire</span>() <span class="kw">as</span> conn:
+
+    <span class="cm"># fetch many rows</span>
+    <span class="var">rows</span> = <span class="kw">await</span> conn.<span class="fn">fetch</span>(
+        <span class="str">"SELECT * FROM users WHERE active=$1"</span>, <span class="kw">True</span>
+    )
+
+    <span class="cm"># fetch one row</span>
+    <span class="var">row</span> = <span class="kw">await</span> conn.<span class="fn">fetchrow</span>(
+        <span class="str">"SELECT * FROM users WHERE id=$1"</span>, <span class="num">1</span>
+    )
+
+    <span class="cm"># execute (insert/update/delete)</span>
+    <span class="kw">await</span> conn.<span class="fn">execute</span>(
+        <span class="str">"INSERT INTO users(email) VALUES($1)"</span>,
+        <span class="str">"dev@x.com"</span>
+    )</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--pg)"></div>transaction + psycopg2</div>
+      <pre><span class="cm">-- transaction = ya sab hoga ya kuch nahi</span>
+<span class="kw">async with</span> pool.<span class="fn">acquire</span>() <span class="kw">as</span> conn:
+    <span class="kw">async with</span> conn.<span class="fn">transaction</span>():
+        <span class="cm"># agar koi bhi fail → sab rollback</span>
+        <span class="kw">await</span> conn.<span class="fn">execute</span>(
+          <span class="str">"UPDATE acc SET bal=bal-$1 WHERE id=$2"</span>,
+          <span class="num">1000</span>, <span class="num">1</span>
+        )
+        <span class="kw">await</span> conn.<span class="fn">execute</span>(
+          <span class="str">"UPDATE acc SET bal=bal+$1 WHERE id=$2"</span>,
+          <span class="num">1000</span>, <span class="num">2</span>
+        )
+
+<span class="cm">-- psycopg2 (sync)</span>
+<span class="kw">import</span> psycopg2
+<span class="kw">from</span> psycopg2.extras <span class="kw">import</span> RealDictCursor
+
+<span class="var">conn</span> = psycopg2.<span class="fn">connect</span>(<span class="str">"dbname=mydb user=postgres"</span>)
+<span class="kw">with</span> conn:
+    <span class="kw">with</span> conn.<span class="fn">cursor</span>(cursor_factory=RealDictCursor) <span class="kw">as</span> cur:
+        cur.<span class="fn">execute</span>(<span class="str">"SELECT * FROM users WHERE id=%s"</span>, (<span class="num">1</span>,))
+        <span class="var">user</span> = cur.<span class="fn">fetchone</span>()  <span class="cm"># dict</span></pre>
+    </div>
+  </div>
+
+  <div class="sec">golden rules</div>
+  <div class="rules">
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">1</div><div class="rule-text"><strong>Hamesha %s ya $1 use karo</strong> — kabhi bhi f-string mein SQL mat likho → SQL injection hoga</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">2</div><div class="rule-text"><strong>Connection pool banao</strong> — har request pe naya connection mat banao → slow aur expensive</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">3</div><div class="rule-text"><strong>TIMESTAMPTZ use karo</strong> — TIMESTAMP nahi → timezone bugs production mein</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">4</div><div class="rule-text"><strong>Migrations use karo</strong> (Alembic) — direct ALTER TABLE production mein mat karo</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">5</div><div class="rule-text"><strong>EXPLAIN ANALYZE karo</strong> slow queries pe — "Seq Scan" dikhey toh index banao</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">6</div><div class="rule-text"><strong>ON DELETE CASCADE soch ke lagao</strong> — galat lagaya toh data automatically delete ho jaayega</div></div>
+  </div>
+</div>
+
+<!-- ==================== MONGODB ==================== -->
+<div id="mg" class="panel">
+
+  <div class="mental-model mg">
+    <div class="mm-title">// mental model</div>
+    <div class="mm-content">
+      MongoDB = <strong>Python dictionaries ko directly database mein save karo.</strong> Koi fixed schema nahi — har document alag ho sakta hai. Best for: <strong>flexible data, rapid prototyping, nested structures</strong> jahan schema baar baar badle.
+    </div>
+  </div>
+
+  <div class="sec">postgresql vs mongodb — ek baar samjho</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>PostgreSQL</th><th>MongoDB Equivalent</th></tr></thead>
+      <tbody>
+        <tr><td>Database</td><td>Database</td></tr>
+        <tr><td>Table</td><td>Collection</td></tr>
+        <tr><td>Row</td><td>Document (JSON/dict)</td></tr>
+        <tr><td>Column</td><td>Field</td></tr>
+        <tr><td>Primary Key</td><td>_id (auto ObjectId)</td></tr>
+        <tr><td>JOIN</td><td>$lookup (awkward) ya embed karo</td></tr>
+        <tr><td>Schema</td><td>Flexible — har doc alag ho sakta hai</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">python + mongodb — pymongo</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--mg)"></div>connect + basic CRUD</div>
+      <pre><span class="kw">from</span> pymongo <span class="kw">import</span> MongoClient
+
+<span class="var">client</span> = <span class="fn">MongoClient</span>(<span class="str">"mongodb://localhost:27017"</span>)
+<span class="var">db</span> = client[<span class="str">"myapp"</span>]
+<span class="var">users</span> = db[<span class="str">"users"</span>]  <span class="cm"># collection</span>
+
+<span class="cm">-- INSERT</span>
+<span class="var">result</span> = users.<span class="fn">insert_one</span>({
+    <span class="str">"email"</span>: <span class="str">"dev@x.com"</span>,
+    <span class="str">"username"</span>: <span class="str">"Dev"</span>,
+    <span class="str">"age"</span>: <span class="num">25</span>
+})
+<span class="var">new_id</span> = result.inserted_id
+
+<span class="cm">-- INSERT MANY</span>
+users.<span class="fn">insert_many</span>([
+    {<span class="str">"email"</span>: <span class="str">"a@x.com"</span>},
+    {<span class="str">"email"</span>: <span class="str">"b@x.com"</span>}
+])
+
+<span class="cm">-- FIND ONE</span>
+<span class="var">user</span> = users.<span class="fn">find_one</span>({<span class="str">"email"</span>: <span class="str">"dev@x.com"</span>})
+
+<span class="cm">-- FIND MANY</span>
+<span class="var">all_users</span> = <span class="fn">list</span>(users.<span class="fn">find</span>({<span class="str">"age"</span>: {<span class="str">"$gt"</span>: <span class="num">18</span>}}))</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--mg)"></div>update + delete + query operators</div>
+      <pre><span class="cm">-- UPDATE</span>
+users.<span class="fn">update_one</span>(
+    {<span class="str">"email"</span>: <span class="str">"dev@x.com"</span>},     <span class="cm"># filter</span>
+    {<span class="str">"$set"</span>: {<span class="str">"username"</span>: <span class="str">"New"</span>}}  <span class="cm"># update</span>
+)
+
+<span class="cm">-- common update operators</span>
+<span class="str">"$set"</span>      <span class="cm"># field set karo</span>
+<span class="str">"$unset"</span>    <span class="cm"># field delete karo</span>
+<span class="str">"$inc"</span>      <span class="cm"># number badhao</span>
+<span class="str">"$push"</span>     <span class="cm"># array mein add karo</span>
+<span class="str">"$pull"</span>     <span class="cm"># array se remove karo</span>
+
+<span class="cm">-- query operators</span>
+<span class="str">"$gt"</span>/<span class="str">"$lt"</span>   <span class="cm"># greater/less than</span>
+<span class="str">"$in"</span>        <span class="cm"># list mein se</span>
+<span class="str">"$exists"</span>    <span class="cm"># field hai ya nahi</span>
+<span class="str">"$regex"</span>     <span class="cm"># pattern match</span>
+
+<span class="cm">-- DELETE</span>
+users.<span class="fn">delete_one</span>({<span class="str">"_id"</span>: user_id})
+users.<span class="fn">delete_many</span>({<span class="str">"is_active"</span>: <span class="kw">False</span>})
+
+<span class="cm">-- COUNT</span>
+<span class="var">count</span> = users.<span class="fn">count_documents</span>({<span class="str">"age"</span>:{<span class="str">"$gt"</span>:<span class="num">18</span>}})</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--mg)"></div>motor — async mongodb (FastAPI)</div>
+      <pre><span class="kw">from</span> motor.motor_asyncio <span class="kw">import</span> AsyncIOMotorClient
+
+<span class="var">client</span> = <span class="fn">AsyncIOMotorClient</span>(<span class="str">"mongodb://localhost:27017"</span>)
+<span class="var">db</span> = client[<span class="str">"myapp"</span>]
+
+<span class="cm">-- async CRUD</span>
+<span class="kw">async def</span> <span class="fn">get_user</span>(email: str):
+    <span class="kw">return await</span> db.users.<span class="fn">find_one</span>({<span class="str">"email"</span>: email})
+
+<span class="kw">async def</span> <span class="fn">create_user</span>(data: dict):
+    <span class="var">result</span> = <span class="kw">await</span> db.users.<span class="fn">insert_one</span>(data)
+    <span class="kw">return</span> str(result.inserted_id)
+
+<span class="cm">-- sort + limit + skip (pagination)</span>
+<span class="var">users</span> = <span class="kw">await</span> db.users.<span class="fn">find</span>({})\
+    .<span class="fn">sort</span>(<span class="str">"created_at"</span>, <span class="num">-1</span>)\
+    .<span class="fn">skip</span>(<span class="num">20</span>)\
+    .<span class="fn">limit</span>(<span class="num">10</span>)\
+    .<span class="fn">to_list</span>(<span class="num">10</span>)</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--mg)"></div>index + when to use mongodb</div>
+      <pre><span class="cm">-- index banao</span>
+db.users.<span class="fn">create_index</span>(<span class="str">"email"</span>, unique=<span class="kw">True</span>)
+db.users.<span class="fn">create_index</span>([(<span class="str">"age"</span>, <span class="num">-1</span>)])
+
+<span class="cm">-- MongoDB USE KARO JAB:</span>
+✅ Schema flexible ho — fields baar baar badelein
+✅ Nested data — posts mein comments embed karo
+✅ Prototype fast banana ho
+✅ Document ek saath read ho (JOIN nahi)
+✅ Horizontal scaling chahiye
+
+<span class="cm">-- PostgreSQL USE KARO JAB:</span>
+✅ Data structured aur relational ho
+✅ Transactions zaroori hain (money etc)
+✅ Complex queries hain
+✅ Data integrity critical ho</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FIREBASE ==================== -->
+<div id="fb" class="panel">
+
+  <div class="mental-model fb">
+    <div class="mm-title">// mental model</div>
+    <div class="mm-content">
+      Firebase = <strong>Google ka managed backend.</strong> Tu sirf frontend likho — database, auth, storage sab Google handle kare. Best for: <strong>quick apps, real-time updates, mobile apps</strong> jahan backend likhna avoid karna ho.
+    </div>
+  </div>
+
+  <div class="sec">firebase products map</div>
+  <div class="when-box">
+    <div class="when-card">
+      <div class="when-title" style="color:var(--fb)">Firestore</div>
+      <div class="when-item">NoSQL database</div>
+      <div class="when-item">Real-time sync</div>
+      <div class="when-item">Offline support</div>
+      <div class="when-item">MongoDB jaisa but managed</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--fb)">Auth</div>
+      <div class="when-item">Email/password login</div>
+      <div class="when-item">Google/GitHub OAuth</div>
+      <div class="when-item">Phone OTP</div>
+      <div class="when-item">JWT tokens automatic</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--fb)">Storage</div>
+      <div class="when-item">Files/images store karo</div>
+      <div class="when-item">S3 jaisa but simpler</div>
+      <div class="when-item">Direct upload from browser</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--fb)">Functions</div>
+      <div class="when-item">Serverless backend code</div>
+      <div class="when-item">AWS Lambda jaisa</div>
+      <div class="when-item">Trigger on DB change</div>
+    </div>
+  </div>
+
+  <div class="sec">python + firebase — firebase-admin</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--fb)"></div>setup + firestore CRUD</div>
+      <pre><span class="kw">import</span> firebase_admin
+<span class="kw">from</span> firebase_admin <span class="kw">import</span> credentials, firestore
+
+<span class="cm"># initialize once</span>
+<span class="var">cred</span> = credentials.<span class="fn">Certificate</span>(<span class="str">"serviceAccount.json"</span>)
+firebase_admin.<span class="fn">initialize_app</span>(cred)
+<span class="var">db</span> = firestore.<span class="fn">client</span>()
+
+<span class="cm"># CREATE</span>
+db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(<span class="str">"user1"</span>).<span class="fn">set</span>({
+    <span class="str">"email"</span>: <span class="str">"dev@x.com"</span>,
+    <span class="str">"name"</span>: <span class="str">"Dev"</span>
+})
+
+<span class="cm"># auto ID</span>
+db.<span class="fn">collection</span>(<span class="str">"posts"</span>).<span class="fn">add</span>({<span class="str">"title"</span>: <span class="str">"Hello"</span>})
+
+<span class="cm"># READ</span>
+<span class="var">doc</span> = db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(<span class="str">"user1"</span>).<span class="fn">get</span>()
+<span class="var">data</span> = doc.<span class="fn">to_dict</span>()
+
+<span class="cm"># QUERY</span>
+<span class="var">users</span> = db.<span class="fn">collection</span>(<span class="str">"users"</span>)\
+    .<span class="fn">where</span>(<span class="str">"age"</span>, <span class="str">"&gt;="</span>, <span class="num">18</span>)\
+    .<span class="fn">order_by</span>(<span class="str">"name"</span>)\
+    .<span class="fn">limit</span>(<span class="num">10</span>)\
+    .<span class="fn">stream</span>()</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--fb)"></div>update + delete + when to use</div>
+      <pre><span class="cm"># UPDATE (partial)</span>
+db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(<span class="str">"user1"</span>).<span class="fn">update</span>({
+    <span class="str">"name"</span>: <span class="str">"New Name"</span>
+})
+
+<span class="cm"># DELETE</span>
+db.<span class="fn">collection</span>(<span class="str">"users"</span>).<span class="fn">document</span>(<span class="str">"user1"</span>).<span class="fn">delete</span>()
+
+<span class="cm"># BATCH — multiple operations ek saath</span>
+<span class="var">batch</span> = db.<span class="fn">batch</span>()
+batch.<span class="fn">set</span>(db.<span class="fn">collection</span>(<span class="str">"a"</span>).<span class="fn">document</span>(), {<span class="str">"x"</span>: <span class="num">1</span>})
+batch.<span class="fn">set</span>(db.<span class="fn">collection</span>(<span class="str">"b"</span>).<span class="fn">document</span>(), {<span class="str">"y"</span>: <span class="num">2</span>})
+batch.<span class="fn">commit</span>()
+
+<span class="cm"># FIREBASE USE KARO JAB:</span>
+✅ Side project / MVP fast banana ho
+✅ Real-time updates chahiye (chat, live)
+✅ Auth khud nahi likhna
+✅ Mobile app hai (React Native)
+✅ Small team, koi backend nahi
+
+<span class="cm"># AVOID JAB:</span>
+❌ Complex queries chahiye
+❌ Cost control zaroori ho (scale pe mehenga)
+❌ Data relationships complex hain</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== S3 ==================== -->
+<div id="s3" class="panel">
+
+  <div class="mental-model s3c">
+    <div class="mm-title">// mental model</div>
+    <div class="mm-content">
+      S3 = <strong>infinite hard drive on internet.</strong> Files, images, videos, backups — kuch bhi store karo. Database nahi — sirf file storage. <strong>Bucket = folder, Object = file.</strong> URL se directly access karo.
+    </div>
+  </div>
+
+  <div class="sec">core concepts</div>
+  <div class="when-box">
+    <div class="when-card">
+      <div class="when-title" style="color:var(--s3c)">Bucket</div>
+      <div class="when-item">Top-level container</div>
+      <div class="when-item">Name globally unique</div>
+      <div class="when-item">Region choose karo</div>
+      <div class="when-item">Like a root folder</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--s3c)">Object</div>
+      <div class="when-item">Actual file</div>
+      <div class="when-item">Key = file path</div>
+      <div class="when-item">Max 5TB per object</div>
+      <div class="when-item">Metadata attach kar sakte ho</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--s3c)">Access</div>
+      <div class="when-item">Private by default</div>
+      <div class="when-item">Public URL ban sakta hai</div>
+      <div class="when-item">Presigned URL — temp access</div>
+      <div class="when-item">CloudFront se CDN</div>
+    </div>
+    <div class="when-card">
+      <div class="when-title" style="color:var(--s3c)">Pricing</div>
+      <div class="when-item">Storage: $0.023/GB/month</div>
+      <div class="when-item">GET: $0.0004/1000 requests</div>
+      <div class="when-item">Transfer out: $0.09/GB</div>
+      <div class="when-item">First 5GB free</div>
+    </div>
+  </div>
+
+  <div class="sec">python + s3 — boto3</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--s3c)"></div>upload · download · delete</div>
+      <pre><span class="kw">import</span> boto3
+
+<span class="var">s3</span> = boto3.<span class="fn">client</span>(<span class="str">"s3"</span>,
+    aws_access_key_id=<span class="str">"KEY"</span>,
+    aws_secret_access_key=<span class="str">"SECRET"</span>,
+    region_name=<span class="str">"ap-south-1"</span>
+)
+
+<span class="cm"># UPLOAD file</span>
+s3.<span class="fn">upload_file</span>(
+    <span class="str">"local_file.jpg"</span>,    <span class="cm"># local path</span>
+    <span class="str">"my-bucket"</span>,          <span class="cm"># bucket name</span>
+    <span class="str">"uploads/file.jpg"</span>    <span class="cm"># s3 key (path)</span>
+)
+
+<span class="cm"># UPLOAD bytes (no local file needed)</span>
+s3.<span class="fn">put_object</span>(
+    Bucket=<span class="str">"my-bucket"</span>,
+    Key=<span class="str">"data/file.txt"</span>,
+    Body=b<span class="str">"hello world"</span>,
+    ContentType=<span class="str">"text/plain"</span>
+)
+
+<span class="cm"># DOWNLOAD</span>
+s3.<span class="fn">download_file</span>(<span class="str">"my-bucket"</span>, <span class="str">"key"</span>, <span class="str">"local.jpg"</span>)
+
+<span class="cm"># DELETE</span>
+s3.<span class="fn">delete_object</span>(Bucket=<span class="str">"my-bucket"</span>, Key=<span class="str">"key"</span>)
+
+<span class="cm"># LIST files</span>
+<span class="var">resp</span> = s3.<span class="fn">list_objects_v2</span>(
+    Bucket=<span class="str">"my-bucket"</span>, Prefix=<span class="str">"uploads/"</span>
+)
+<span class="var">files</span> = [obj[<span class="str">"Key"</span>] <span class="kw">for</span> obj <span class="kw">in</span> resp[<span class="str">"Contents"</span>]]</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--s3c)"></div>presigned URL — temp access</div>
+      <pre><span class="cm"># Presigned URL = temporary link</span>
+<span class="cm"># User directly upload kare S3 pe</span>
+<span class="cm"># (no server middleman)</span>
+
+<span class="cm"># UPLOAD URL generate karo</span>
+<span class="var">url</span> = s3.<span class="fn">generate_presigned_url</span>(
+    <span class="str">"put_object"</span>,
+    Params={
+        <span class="str">"Bucket"</span>: <span class="str">"my-bucket"</span>,
+        <span class="str">"Key"</span>: <span class="str">"uploads/photo.jpg"</span>,
+        <span class="str">"ContentType"</span>: <span class="str">"image/jpeg"</span>
+    },
+    ExpiresIn=<span class="num">3600</span>  <span class="cm"># 1 hour valid</span>
+)
+<span class="cm"># frontend ko yeh URL do</span>
+<span class="cm"># woh directly S3 pe upload kare</span>
+
+<span class="cm"># DOWNLOAD URL</span>
+<span class="var">url</span> = s3.<span class="fn">generate_presigned_url</span>(
+    <span class="str">"get_object"</span>,
+    Params={<span class="str">"Bucket"</span>: <span class="str">"my-bucket"</span>, <span class="str">"Key"</span>: <span class="str">"file.jpg"</span>},
+    ExpiresIn=<span class="num">300</span>  <span class="cm"># 5 min</span>
+)
+
+<span class="cm"># FASTAPI mein use karo</span>
+<span class="kw">@app</span>.get(<span class="str">"/upload-url"</span>)
+<span class="kw">async def</span> <span class="fn">get_upload_url</span>(filename: str):
+    <span class="var">key</span> = <span class="str">f"uploads/{uuid4()}/{filename}"</span>
+    <span class="var">url</span> = s3.<span class="fn">generate_presigned_url</span>(<span class="str">"put_object"</span>,
+        Params={<span class="str">"Bucket"</span>: BUCKET, <span class="str">"Key"</span>: key},
+        ExpiresIn=<span class="num">3600</span>)
+    <span class="kw">return</span> {<span class="str">"url"</span>: url, <span class="str">"key"</span>: key}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REDIS ==================== -->
+<div id="rd" class="panel">
+
+  <div class="mental-model rd">
+    <div class="mm-title">// mental model</div>
+    <div class="mm-content">
+      Redis = <strong>super fast Python dictionary jo RAM mein rehta hai.</strong> Database replace nahi karta — uske saath use karo. Cache, session store, rate limiting, pub/sub — <strong>speed chahiye toh Redis.</strong>
+    </div>
+  </div>
+
+  <div class="sec">redis data structures</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Like Python</th><th>Use For</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:var(--rd);font-family:monospace">String</span></td><td>str / int</td><td>Cache, counters, session tokens</td></tr>
+        <tr><td><span style="color:var(--rd);font-family:monospace">Hash</span></td><td>dict</td><td>User profile, object store</td></tr>
+        <tr><td><span style="color:var(--rd);font-family:monospace">List</span></td><td>list (deque)</td><td>Queue, recent items, activity feed</td></tr>
+        <tr><td><span style="color:var(--rd);font-family:monospace">Set</span></td><td>set</td><td>Unique visitors, tags, membership</td></tr>
+        <tr><td><span style="color:var(--rd);font-family:monospace">Sorted Set</span></td><td>dict with score</td><td>Leaderboard, rate limiting, priority queue</td></tr>
+        <tr><td><span style="color:var(--rd);font-family:monospace">Pub/Sub</span></td><td>event emitter</td><td>Real-time notifications, live updates</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">python + redis</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--rd)"></div>basic commands</div>
+      <pre><span class="kw">import</span> redis
+
+<span class="var">r</span> = redis.<span class="fn">Redis</span>(host=<span class="str">"localhost"</span>, port=<span class="num">6379</span>, db=<span class="num">0</span>)
+
+<span class="cm"># STRING — set + get</span>
+r.<span class="fn">set</span>(<span class="str">"name"</span>, <span class="str">"Dev"</span>)
+r.<span class="fn">set</span>(<span class="str">"name"</span>, <span class="str">"Dev"</span>, ex=<span class="num">3600</span>)  <span class="cm"># expire 1hr</span>
+r.<span class="fn">get</span>(<span class="str">"name"</span>)     <span class="cm"># b"Dev"</span>
+r.<span class="fn">delete</span>(<span class="str">"name"</span>)
+
+<span class="cm"># COUNTER</span>
+r.<span class="fn">incr</span>(<span class="str">"visits"</span>)   <span class="cm"># 1</span>
+r.<span class="fn">incr</span>(<span class="str">"visits"</span>)   <span class="cm"># 2</span>
+r.<span class="fn">incrby</span>(<span class="str">"visits"</span>, <span class="num">5</span>)  <span class="cm"># 7</span>
+
+<span class="cm"># HASH — like dict</span>
+r.<span class="fn">hset</span>(<span class="str">"user:1"</span>, mapping={
+    <span class="str">"name"</span>: <span class="str">"Dev"</span>, <span class="str">"age"</span>: <span class="str">"25"</span>
+})
+r.<span class="fn">hget</span>(<span class="str">"user:1"</span>, <span class="str">"name"</span>)   <span class="cm"># Dev</span>
+r.<span class="fn">hgetall</span>(<span class="str">"user:1"</span>)         <span class="cm"># full dict</span>
+
+<span class="cm"># LIST — queue</span>
+r.<span class="fn">rpush</span>(<span class="str">"queue"</span>, <span class="str">"task1"</span>)  <span class="cm"># right push</span>
+r.<span class="fn">lpop</span>(<span class="str">"queue"</span>)            <span class="cm"># left pop</span></pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--rd)"></div>caching pattern — most common use</div>
+      <pre><span class="kw">import</span> json
+<span class="kw">import</span> redis
+
+<span class="var">r</span> = redis.<span class="fn">Redis</span>(host=<span class="str">"localhost"</span>)
+
+<span class="kw">async def</span> <span class="fn">get_user</span>(user_id: int):
+    <span class="var">cache_key</span> = <span class="str">f"user:{user_id}"</span>
+
+    <span class="cm"># 1. cache check karo</span>
+    <span class="var">cached</span> = r.<span class="fn">get</span>(cache_key)
+    <span class="kw">if</span> cached:
+        <span class="kw">return</span> json.<span class="fn">loads</span>(cached)  <span class="cm"># cache hit</span>
+
+    <span class="cm"># 2. DB se lo</span>
+    <span class="var">user</span> = <span class="kw">await</span> db.<span class="fn">fetchrow</span>(
+        <span class="str">"SELECT * FROM users WHERE id=$1"</span>, user_id
+    )
+
+    <span class="cm"># 3. cache mein save karo</span>
+    r.<span class="fn">set</span>(cache_key,
+         json.<span class="fn">dumps</span>(<span class="fn">dict</span>(user)),
+         ex=<span class="num">300</span>)  <span class="cm"># 5 min</span>
+
+    <span class="kw">return</span> user
+
+<span class="cm"># cache invalidate karo jab update ho</span>
+<span class="kw">async def</span> <span class="fn">update_user</span>(user_id, data):
+    <span class="kw">await</span> db.<span class="fn">execute</span>(<span class="str">"UPDATE users..."</span>)
+    r.<span class="fn">delete</span>(<span class="str">f"user:{user_id}"</span>)  <span class="cm"># cache clear</span></pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--rd)"></div>rate limiting</div>
+      <pre><span class="kw">from</span> fastapi <span class="kw">import</span> HTTPException
+
+<span class="kw">def</span> <span class="fn">rate_limit</span>(user_id: str, limit=<span class="num">10</span>, window=<span class="num">60</span>):
+    <span class="var">key</span> = <span class="str">f"rate:{user_id}"</span>
+    <span class="var">current</span> = r.<span class="fn">incr</span>(key)
+
+    <span class="kw">if</span> current == <span class="num">1</span>:
+        r.<span class="fn">expire</span>(key, window)  <span class="cm"># first req — timer set</span>
+
+    <span class="kw">if</span> current > limit:
+        <span class="kw">raise</span> <span class="fn">HTTPException</span>(<span class="num">429</span>, <span class="str">"Too many requests"</span>)
+
+<span class="cm"># use in route</span>
+<span class="kw">@app</span>.get(<span class="str">"/api/data"</span>)
+<span class="kw">async def</span> <span class="fn">get_data</span>(user_id: str):
+    <span class="fn">rate_limit</span>(user_id, limit=<span class="num">10</span>, window=<span class="num">60</span>)
+    <span class="cm"># 10 requests per 60 seconds allowed</span>
+    ...</pre>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:var(--rd)"></div>session store + async redis</div>
+      <pre><span class="cm"># aioredis — async redis (FastAPI)</span>
+<span class="kw">import</span> aioredis
+
+<span class="var">redis_client</span> = <span class="kw">await</span> aioredis.<span class="fn">create_redis_pool</span>(
+    <span class="str">"redis://localhost"</span>
+)
+
+<span class="cm"># session store</span>
+<span class="kw">import</span> secrets
+
+<span class="kw">async def</span> <span class="fn">create_session</span>(user_id: int):
+    <span class="var">token</span> = secrets.<span class="fn">token_hex</span>(<span class="num">32</span>)
+    <span class="kw">await</span> redis_client.<span class="fn">setex</span>(
+        <span class="str">f"session:{token}"</span>,
+        <span class="num">86400</span>,     <span class="cm"># 24 hours</span>
+        user_id
+    )
+    <span class="kw">return</span> token
+
+<span class="kw">async def</span> <span class="fn">get_session</span>(token: str):
+    <span class="var">user_id</span> = <span class="kw">await</span> redis_client.<span class="fn">get</span>(<span class="str">f"session:{token}"</span>)
+    <span class="kw">return</span> int(user_id) <span class="kw">if</span> user_id <span class="kw">else None</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== COMPARE ALL ==================== -->
+<div id="cm" class="panel">
+
+  <div class="sec">when to use what — decision guide</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Need</th>
+          <th>Use</th>
+          <th>Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>User data, orders, products</td><td><span style="color:var(--pg);font-family:monospace">PostgreSQL</span></td><td>Structured, relational, ACID</td></tr>
+        <tr><td>Flexible schema, nested docs</td><td><span style="color:var(--mg);font-family:monospace">MongoDB</span></td><td>Schema-less, easy to change</td></tr>
+        <tr><td>Real-time updates (chat, live)</td><td><span style="color:var(--fb);font-family:monospace">Firebase</span></td><td>Built-in real-time sync</td></tr>
+        <tr><td>Images, files, videos</td><td><span style="color:var(--s3c);font-family:monospace">AWS S3</span></td><td>Infinite storage, CDN ready</td></tr>
+        <tr><td>Cache — DB pe load kam karo</td><td><span style="color:var(--rd);font-family:monospace">Redis</span></td><td>RAM mein — microsecond speed</td></tr>
+        <tr><td>Session tokens store karo</td><td><span style="color:var(--rd);font-family:monospace">Redis</span></td><td>Fast + auto expire</td></tr>
+        <tr><td>Rate limiting</td><td><span style="color:var(--rd);font-family:monospace">Redis</span></td><td>Atomic increment + TTL</td></tr>
+        <tr><td>Quick MVP / side project</td><td><span style="color:var(--fb);font-family:monospace">Firebase</span></td><td>No backend needed</td></tr>
+        <tr><td>Money / transactions</td><td><span style="color:var(--pg);font-family:monospace">PostgreSQL</span></td><td>ACID — ya sab hoga ya kuch nahi</td></tr>
+        <tr><td>Logs, events, analytics</td><td><span style="color:var(--mg);font-family:monospace">MongoDB</span></td><td>Schema-less, horizontal scale</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">full comparison matrix</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="cmp-cell">PostgreSQL</th>
+          <th class="cmp-cell">MongoDB</th>
+          <th class="cmp-cell">Firebase</th>
+          <th class="cmp-cell">S3</th>
+          <th class="cmp-cell">Redis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Type</td><td class="cmp-cell" style="color:var(--pg)">SQL/Relational</td><td class="cmp-cell" style="color:var(--mg)">NoSQL/Document</td><td class="cmp-cell" style="color:var(--fb)">NoSQL/Document</td><td class="cmp-cell" style="color:var(--s3c)">Object Store</td><td class="cmp-cell" style="color:var(--rd)">In-Memory</td></tr>
+        <tr><td>Data in</td><td class="cmp-cell">RAM + Disk</td><td class="cmp-cell">RAM + Disk</td><td class="cmp-cell">Google Cloud</td><td class="cmp-cell">Disk (S3)</td><td class="cmp-cell">RAM only</td></tr>
+        <tr><td>Speed</td><td class="cmp-cell"><span class="ok">Fast</span></td><td class="cmp-cell"><span class="ok">Fast</span></td><td class="cmp-cell"><span class="ok">Fast</span></td><td class="cmp-cell"><span class="ok">Fast</span></td><td class="cmp-cell"><span class="yes">Fastest</span></td></tr>
+        <tr><td>Schema</td><td class="cmp-cell"><span class="yes">Strict</span></td><td class="cmp-cell">Flexible</td><td class="cmp-cell">Flexible</td><td class="cmp-cell">No schema</td><td class="cmp-cell">No schema</td></tr>
+        <tr><td>Transactions</td><td class="cmp-cell"><span class="yes">Full ACID</span></td><td class="cmp-cell"><span class="ok">Limited</span></td><td class="cmp-cell"><span class="ok">Limited</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="ok">Basic</span></td></tr>
+        <tr><td>Relations/JOIN</td><td class="cmp-cell"><span class="yes">Yes</span></td><td class="cmp-cell"><span class="no">Awkward</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="no">No</span></td></tr>
+        <tr><td>Complex Queries</td><td class="cmp-cell"><span class="yes">Yes</span></td><td class="cmp-cell"><span class="ok">Limited</span></td><td class="cmp-cell"><span class="no">Very Limited</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="no">No</span></td></tr>
+        <tr><td>Real-time</td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="ok">Change Streams</span></td><td class="cmp-cell"><span class="yes">Built-in</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="yes">Pub/Sub</span></td></tr>
+        <tr><td>Self-hosted</td><td class="cmp-cell"><span class="yes">Yes</span></td><td class="cmp-cell"><span class="yes">Yes</span></td><td class="cmp-cell"><span class="no">No</span></td><td class="cmp-cell"><span class="ok">MinIO</span></td><td class="cmp-cell"><span class="yes">Yes</span></td></tr>
+        <tr><td>Free tier</td><td class="cmp-cell"><span class="yes">Free</span></td><td class="cmp-cell"><span class="yes">Atlas Free</span></td><td class="cmp-cell"><span class="yes">Generous</span></td><td class="cmp-cell"><span class="ok">5GB free</span></td><td class="cmp-cell"><span class="yes">Free</span></td></tr>
+        <tr><td>Startup use</td><td class="cmp-cell"><span class="yes">Primary DB</span></td><td class="cmp-cell"><span class="ok">Sometimes</span></td><td class="cmp-cell"><span class="ok">MVP only</span></td><td class="cmp-cell"><span class="yes">File storage</span></td><td class="cmp-cell"><span class="yes">Cache layer</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec">typical startup stack</div>
+  <div class="rules">
+    <div class="rule"><div class="rule-num" style="background:rgba(74,222,154,0.1);color:var(--pg)">DB</div><div class="rule-text"><strong>PostgreSQL</strong> — primary database. Users, orders, products, sab kuch yahan.</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(224,82,82,0.1);color:var(--rd)">Cache</div><div class="rule-text"><strong>Redis</strong> — PostgreSQL ke saath. Frequently accessed data cache karo. Sessions store karo. Rate limiting.</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(255,107,53,0.1);color:var(--s3c)">Files</div><div class="rule-text"><strong>AWS S3</strong> — images, videos, documents, exports. PostgreSQL mein sirf S3 key store karo.</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(71,183,132,0.1);color:var(--mg)">Logs</div><div class="rule-text"><strong>MongoDB</strong> — optional. Event logs, analytics, flexible data jo baar baar badle.</div></div>
+    <div class="rule"><div class="rule-num" style="background:rgba(245,166,35,0.1);color:var(--fb)">Skip</div><div class="rule-text"><strong>Firebase</strong> — sirf agar backend bilkul nahi likhna. Production startup mein generally avoid karo.</div></div>
+  </div>
+
+  <div class="sec">python libraries — quick reference</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Database</th><th>Sync</th><th>Async (FastAPI)</th><th>Install</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:var(--pg)">PostgreSQL</span></td><td>psycopg2</td><td>asyncpg</td><td><code style="font-family:monospace;font-size:11px">pip install asyncpg psycopg2-binary</code></td></tr>
+        <tr><td><span style="color:var(--pg)">PostgreSQL ORM</span></td><td>SQLAlchemy</td><td>SQLAlchemy async</td><td><code style="font-family:monospace;font-size:11px">pip install sqlalchemy</code></td></tr>
+        <tr><td><span style="color:var(--mg)">MongoDB</span></td><td>pymongo</td><td>motor</td><td><code style="font-family:monospace;font-size:11px">pip install pymongo motor</code></td></tr>
+        <tr><td><span style="color:var(--fb)">Firebase</span></td><td>firebase-admin</td><td>firebase-admin</td><td><code style="font-family:monospace;font-size:11px">pip install firebase-admin</code></td></tr>
+        <tr><td><span style="color:var(--s3c)">AWS S3</span></td><td>boto3</td><td>aiobotocore</td><td><code style="font-family:monospace;font-size:11px">pip install boto3</code></td></tr>
+        <tr><td><span style="color:var(--rd)">Redis</span></td><td>redis-py</td><td>aioredis</td><td><code style="font-family:monospace;font-size:11px">pip install redis aioredis</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
