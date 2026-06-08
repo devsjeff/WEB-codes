@@ -1,2 +1,6 @@
+WEB -
+      REACT - 
+                         React Basic Topics 1–9                 https://pagestohost-e6jf.vercel.app/
+                         React Advance Topics 19–30             https://pagestohost-e6jf.vercel.app/
 DATABASES -
-      postgreSQL - https://devsjeffdb.netlify.app/
+                               PostgreSQL                        https://devsjeffdb.netlify.app/
