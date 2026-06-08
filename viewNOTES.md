@@ -6,11 +6,17 @@ A collection of concise notes, reviews, interview prep, and learning resources f
 
 ## 🌐 Web Development
 
+###  BAsics
+
+| Resource                    | Link                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| html  css  tailwandcss   | https://htmlcsstailwand.netlify.app/                                    |
+
 ###  JS
 
 | Resource                    | Link                                                                    |
 | --------------------------- | ----------------------------------------------------------------------- |
-| js                     | https://devsjeffjs.netlify.app/                                |
+| js                     | https://devsjeffjs.netlify.app/                                               |
 
 ### ⚛️ React
 
@@ -28,9 +34,15 @@ A collection of concise notes, reviews, interview prep, and learning resources f
 
 | Resource                    | Link                                                                    |
 | --------------------------- | ----------------------------------------------------------------------- |
-| Next.js                     | https://next-js-ten-gold-17.vercel.app/                                  |
+| Next.js                     | https://next-js-ten-gold-17.vercel.app/                                 |
 
 ---
+
+###  TYPESCRIPT NODE JS
+
+| Resource                    | Link                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| node & typescri             |https://typescriptandnodejs.netlify.app/                                 |
 
 ### EXPRESS
 
