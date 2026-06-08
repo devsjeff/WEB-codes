@@ -1,10 +1,17 @@
-WEB -
-      REACT -             
-                        React quick review                https://claude.ai/public/artifacts/6b9c99ce-7e97-486c-b173-8ab592be08df
-                         Basic Topics 1–9                 https://claude.ai/public/artifacts/f4cbd549-68d7-4d96-baf7-713d84fe7d3b
-                         Intermediat Topics 10–18         https://claude.ai/public/artifacts/a4bee66b-a658-4568-b7e2-78f15e64fd2e
-                         Advance Topics 19–30             https://pagestohost-e6jf.vercel.app/
-                         Interview All Definitions        https://claude.ai/public/artifacts/3e640a9a-02ea-4137-bd48-42efa459f389
-                         
-DATABASES -
-                               PostgreSQL                        https://devsjeffdb.netlify.app/
+# React
+
+## 🔗 Links
+| Resource | Description |
+|----------|-------------|
+| [Quick Review](https://claude.ai/public/artifacts/6b9c99ce...) | Full React overview |
+| [Basic Topics 1–9](https://claude.ai/public/artifacts/f4cbd549...) | Fundamentals |
+| [Intermediate 10–18](https://claude.ai/public/artifacts/a4bee66b...) | Mid-level concepts |
+| [Advanced 19–30](https://pagestohost-e6jf.vercel.app/) | Advanced patterns |
+| [Interview Definitions](https://claude.ai/public/artifacts/3e640a9a...) | All definitions |
+
+## 📝 Local Notes
+- [quick-review.md](./quick-review.md)
+- [interview-definitions.md](./interview-definitions.md)
+
+## 🗒️ Quick Reminders
+<!-- Drop your 2-3 line "always forget this" notes here -->
