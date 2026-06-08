@@ -37,7 +37,14 @@ A collection of concise notes, reviews, interview prep, and learning resources f
 
 ## 🗄️ Databases
 
-### PostgreSQL
+
+### PostgreSQL  JS
+
+| Resource         | Link                                |
+| ---------------- | ------------------------------------|
+| PostgreSQL Notes | https://databaseforjs.netlify.app/  |
+
+### PostgreSQL  PYTHON
 
 | Resource         | Link                            |
 | ---------------- | ------------------------------- |
