@@ -18,6 +18,13 @@ A collection of concise notes, reviews, interview prep, and learning resources f
 | Interview Definitions       | https://claude.ai/public/artifacts/3e640a9a-02ea-4137-bd48-42efa459f389 |
 
 ---
+###  Next
+
+| Resource                    | Link                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Next.js                     | https://next-js-ten-gold-17.vercel.app/                                  |
+
+---
 
 ## 🗄️ Databases
 
