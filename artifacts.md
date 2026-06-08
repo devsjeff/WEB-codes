@@ -6,6 +6,12 @@ A collection of concise notes, reviews, interview prep, and learning resources f
 
 ## 🌐 Web Development
 
+###  JS
+
+| Resource                    | Link                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| js                     | https://devsjeffjs.netlify.app/                                |
+
 ### ⚛️ React
 
 | Resource                    | Link                                                                    |
